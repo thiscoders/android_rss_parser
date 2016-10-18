@@ -25,6 +25,7 @@ import lg.android.rssparser.domain.Item;
 public class StreamUtils {
     private final static String tag = "StreamUtils";
 
+
     /**
      * 将inputstraem转化为String返回
      *

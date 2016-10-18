@@ -13,21 +13,17 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import lg.android.rssparser.R;
-import lg.android.rssparser.utils.StreamUtils;
-import lg.android.rssparser.utils.StringUtils;
+import lg.android.rssparser.utils.CommonUtils;
 
 /**
  * Created by ye on 10/10/16.
  */
 
 public class NewsContentActivity extends AppCompatActivity {
+    private final String tag = NewsContentActivity.class.getSimpleName();
+
     private WebView wv_content;
 
     private String link;
@@ -74,55 +70,25 @@ public class NewsContentActivity extends AppCompatActivity {
             NewsContentActivity.this.startActivity(intent);
         }
         if (id == 3) {
-            // TODO: 10/17/16 下载源码
-
             new Thread() {
+                String info;
+
                 @Override
                 public void run() {
-                    try {
-                        URL url = new URL(link);
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestMethod("GET");
-                        connection.setConnectTimeout(5000);
-
-                        final int code = connection.getResponseCode();
-
-                        if (code != 200) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(NewsContentActivity.this, "下载源码失败！响应码" + code, Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                            });
+                    File dir = NewsContentActivity.this.getExternalFilesDir("download");
+                    //下载源码
+                    info = CommonUtils.downWebResCode(dir, NewsContentActivity.this.link);
+                    //通报结果
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(NewsContentActivity.this, info + "..." + NewsContentActivity.this.link, Toast.LENGTH_LONG).show();
+                            return;
                         }
-
-                        String codes = StreamUtils.stream2String(connection.getInputStream());
-                        File dir = getExternalFilesDir("download");
-                        final String title = link.substring(link.lastIndexOf("/"));
-                        File dest = new File(dir, title);
-                        FileWriter writer = new FileWriter(dest);
-                        writer.write(codes);
-                        writer.close();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(NewsContentActivity.this, "源码下载完成！文件标题:" + title.substring(title.lastIndexOf("/") + 1), Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                        });
-                    } catch (final Exception e) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(NewsContentActivity.this, "源码下载失败,错误：" + e.toString(), Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                        });
-                    }
-
+                    });
                 }
             }.start();
+
         }
 
         return super.onOptionsItemSelected(item);

@@ -81,8 +81,6 @@ public class NewsListActivity extends AppCompatActivity {
 
                 String encoding = StringUtils.getEncoding(showbean.getTitle(), channeltitle);
 
-//                Log.i(tag, showbean.toString() + "..." + channeltitle);
-
                 //获取manager
                 FragmentManager manager = getFragmentManager();
                 //开启事务
@@ -255,7 +253,6 @@ public class NewsListActivity extends AppCompatActivity {
 
                             String encoding = StringUtils.getEncoding(showbean.getTitle(), channeltitle);
 
-//                            Log.i(tag, showbean.toString() + "..." + channeltitle);
                             //获取manager
                             FragmentManager manager = getFragmentManager();
                             //开启事务
