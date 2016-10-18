@@ -40,4 +40,7 @@ public class StringUtils {
         return encoding;
     }
 
+    public static void getDownTitle(String link) {
+        System.out.println(link);
+    }
 }

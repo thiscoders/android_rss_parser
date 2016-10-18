@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebResourceRequest;
@@ -13,9 +14,12 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import lg.android.rssparser.R;
-import lg.android.rssparser.utils.CommonUtils;
+import lg.android.rssparser.utils.StreamUtils;
 
 /**
  * Created by ye on 10/10/16.
@@ -70,25 +74,8 @@ public class NewsContentActivity extends AppCompatActivity {
             NewsContentActivity.this.startActivity(intent);
         }
         if (id == 3) {
-            new Thread() {
-                String info;
-
-                @Override
-                public void run() {
-                    File dir = NewsContentActivity.this.getExternalFilesDir("download");
-                    //下载源码
-                    info = CommonUtils.downWebResCode(dir, NewsContentActivity.this.link);
-                    //通报结果
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(NewsContentActivity.this, info + "..." + NewsContentActivity.this.link, Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                    });
-                }
-            }.start();
-
+            //下载源码
+            downFile();
         }
 
         return super.onOptionsItemSelected(item);
@@ -104,5 +91,75 @@ public class NewsContentActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+
+    private void downFile() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    final String title = getDownTitle();
+                    File dest = new File(NewsContentActivity.this.getExternalFilesDir("download"), title);
+                    if (dest.exists()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(NewsContentActivity.this, "源码已存在，" + title, Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        });
+                        return;
+                    }
+
+
+                    //创建url
+                    URL url = new URL(link);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(5000);
+
+                    final int code = connection.getResponseCode();
+
+                    if (code != 200) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(NewsContentActivity.this, "响应失败，响应码:" + code, Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        return;
+                    }
+
+                    String codes = StreamUtils.stream2String(connection.getInputStream());
+
+
+                    FileWriter writer = new FileWriter(dest);
+                    writer.write(codes);
+
+                    writer.close();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(NewsContentActivity.this, "源码下载完成,文件名:" + title, Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(NewsContentActivity.this, "下载源码失败:" + e.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    return;
+                }
+            }
+        }.start();
+    }
+
+    public String getDownTitle() {
+        return this.link.substring(link.lastIndexOf("/") + 1);
     }
 }
