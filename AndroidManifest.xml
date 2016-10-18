@@ -29,6 +29,9 @@
             android:name=".activity.NewsContentActivity"
             android:label="详情页面" />
 
+        <activity android:name=".activity.ParserWebContentActivity"
+            android:label="解析界面"/>
+
         <activity android:name=".activity.AboutActivity"
             android:label="关于软件"/>
     </application>
