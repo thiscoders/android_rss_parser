@@ -1,11 +1,14 @@
 package lg.android.rssparser.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,10 +16,12 @@ import android.widget.Toast;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -66,26 +71,80 @@ public class ParserWebContentActivity extends AppCompatActivity {
                     File res = new File(dir, fileTitle);
                     Document document = Jsoup.parse(res, "utf-8");
 
+                    Elements elements = document.getElementsByTag("title");
+
+                    if (elements!=null&&elements.size() > 0) {
+                        Element title = elements.get(0);
+                        TextView tv = new TextView(ParserWebContentActivity.this);
+                        tv.setText("\t" + title.text().substring(0, title.text().indexOf("_")));
+                        ll_parent.addView(tv);
+                    }
+
                     Element element = document.getElementById("Cnt-Main-Article-QQ");
+                    if(element==null){
+                        throw new IOException("没有找到Cnt-Main-Article-QQ为id的标签！");
+                    }
                     int i = 0;
                     for (final Element ele : element.getAllElements()) {
                         i++;
                         if (i == 1) {
                             continue;
                         }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                TextView tv = new TextView(ParserWebContentActivity.this);
-                                tv.setText(ele.tagName() + "..." + ele.text());
-                                ll_parent.addView(tv);
+
+                        if (ele.tagName().equals("img")) {
+                            String imgurl = ele.attr("src");
+                            URL url = new URL(imgurl);
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setRequestMethod("GET");
+                            connection.setConnectTimeout(5000);
+
+                            final int code = connection.getResponseCode();
+
+                            if (code != 200) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(ParserWebContentActivity.this, "图片获取失败，响应码：" + code, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
-                        });
+
+                            InputStream inputStream = connection.getInputStream();
+
+                            final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ImageView iv = new ImageView(ParserWebContentActivity.this);
+                                    iv.setImageBitmap(bitmap);
+                                    ll_parent.addView(iv);
+                                }
+                            });
+                        }
+
+                        if (ele.tagName().equals("p") && !ele.text().isEmpty()) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    TextView tv = new TextView(ParserWebContentActivity.this);
+                                    tv.setText("\t" + ele.text());
+                                    ll_parent.addView(tv);
+                                }
+                            });
+                        }
+
+
                     }
 
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (final IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ParserWebContentActivity.this, "获取图片或者文字失败，" + e.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
 
 

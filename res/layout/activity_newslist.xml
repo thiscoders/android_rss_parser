@@ -4,14 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="3dp">
+    android:paddingRight="10dp">
 
     <HorizontalScrollView
         android:id="@+id/hsv_newss"
-        android:scrollbars="none"
         android:layout_width="match_parent"
-        android:layout_height="18dp">
+        android:layout_height="18dp"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
