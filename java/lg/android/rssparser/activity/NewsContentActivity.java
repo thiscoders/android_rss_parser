@@ -68,6 +68,13 @@ public class NewsContentActivity extends AppCompatActivity {
             this.startActivity(intent);
         }
         if (id == 2) {
+            //判断文件是否下载
+            File dir = this.getExternalFilesDir("download");
+            File dest = new File(dir, getDownTitle());
+            if (!dest.exists()) {
+                Toast.makeText(this, "请先下载资源文件！", Toast.LENGTH_SHORT).show();
+                return super.onOptionsItemSelected(item);
+            }
             //打开解析界面，并传递参数
             Intent intent = new Intent(NewsContentActivity.this, ParserWebContentActivity.class);
             intent.putExtra("link", this.link);
