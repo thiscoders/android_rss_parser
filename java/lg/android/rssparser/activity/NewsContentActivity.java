@@ -112,7 +112,6 @@ public class NewsContentActivity extends AppCompatActivity {
                         return;
                     }
 
-
                     //创建url
                     URL url = new URL(link);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();

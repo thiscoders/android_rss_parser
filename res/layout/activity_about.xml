@@ -22,6 +22,20 @@
         android:text="本软件完全免费，仅供学习之用！"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/tv_gitaddr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_desc01"
+        android:layout_centerHorizontal="true"
+        android:text="https://github.com/thiscoders/android_rssparser.git" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_gitaddr"
+        android:layout_centerHorizontal="true"
+        android:text="(github地址)" />
 
     <TextView
         android:id="@+id/tv_copyright"
